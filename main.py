@@ -7,8 +7,31 @@ import gerenciador
 
 tarefas = []
 
-
 while True:
     interface.menu()
-    break
+    try:  # Verifica e trata erros de input
+        opcao_usuario = int(input('Digite um número: '))
+    except ValueError:
+        print('Entrada inválida! Digite um número ou "N" para cancelar.')
+        input('Aperte ENTER para continuar...')
+        continue
 
+    match opcao_usuario:
+        case 1:
+            print('Criar Tarefa')
+            nome = input('Digite o nome do tarefa: ')
+            desc = input("Digite a descrição da tarefa: ")
+            prioridade = int(input("Digite a prioridade do tarefa: (1 = ALTA PRIORIDIADE // 5 = BAIXA PRIORIDIADE)  "))
+            tarefas.append(gerenciador.cria_tarefa(nome, desc, prioridade))
+            print(tarefas)
+        case 2:
+            pass
+        case 3:
+            pass
+        case 4:
+            pass
+        case 6:
+            pass
+            break
+        case _:
+            print('Digite um número válido!')
