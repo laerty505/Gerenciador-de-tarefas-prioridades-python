@@ -6,3 +6,12 @@ def cria_tarefa(nome, descricao, prioridade):
     }
     return tarefa
 
+def listar_tarefas(fila):
+    if fila.is_empty():
+        print("Não há tarefas na fila.")
+    else:
+        for i, tarefa in enumerate(fila.elementos, start=1):
+            print(f"{i}. {tarefa['nome']} — {tarefa['descricao']}")
+
+    return fila
+
