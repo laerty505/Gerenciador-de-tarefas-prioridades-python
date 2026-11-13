@@ -9,6 +9,7 @@ tarefas = []
 
 while True:
     interface.menu()
+    interface.selecao()
     try:  # Verifica e trata erros de input
         opcao_usuario = int(input('Digite um número: '))
     except ValueError:
@@ -25,12 +26,12 @@ while True:
             tarefas.append(gerenciador.cria_tarefa(nome, desc, prioridade))
             print(tarefas)
         case 2:
-            pass
+            print("Editar tarefa")
         case 3:
             pass
         case 4:
             pass
-        case 6:
+        case 5:
             pass
             break
         case _:
