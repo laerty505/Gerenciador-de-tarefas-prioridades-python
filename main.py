@@ -35,8 +35,16 @@ while True:
         case 2:
             print("Editar tarefa")
         case 3:
-            pass
+            print("Excluir tarefas")
+            try:
+                indice = int(input("Digite o indice do tarefa: "))
+            except ValueError:
+                print("Digite um número válido")
+                input("Aperte ENTER para continuar...")
+                continue
+            gerenciador.excluir_tarefa(tarefas, indice)
         case 4:
+            print('Listar tarefas')
             gerenciador.listar_tarefas(tarefas)
         case 5:
             break

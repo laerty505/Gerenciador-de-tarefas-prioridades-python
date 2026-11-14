@@ -15,3 +15,15 @@ def listar_tarefas(fila):
 
     return fila
 
+def excluir_tarefa(fila, indice):
+    if fila.is_empty():
+        print("Não há tarefas na fila.")
+    else:
+        for i in fila.elementos:
+            fila.elementos.pop(indice)
+
+    return fila
+
+
+
+
