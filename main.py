@@ -34,6 +34,21 @@ while True:
 
         case 2:
             print("Editar tarefa")
+            gerenciador.listar_tarefas(tarefas)
+            try:
+                indice = int(input("Digite o índice da tarefa que deseja editar: "))
+                prioridade = int(input("Digite a nova prioridade (1 = ALTA PRIORIDADE // 5 = BAIXA PRIORIDADE): "))
+            except ValueError:
+                print("Digite números válidos.")
+                input("Aperte ENTER para continuar...")
+                continue
+            if prioridade < 1 or prioridade > 5:
+                print("Digite uma prioridade de 1 a 5.")
+                input("Aperte ENTER para continuar...")
+                continue
+            nome = input("Digite o novo nome da tarefa: ")
+            desc = input("Digite a nova descrição da tarefa: ")
+            gerenciador.editar_tarefa(tarefas, indice, nome, desc, prioridade)
         case 3:
             print("Excluir tarefas")
             try:

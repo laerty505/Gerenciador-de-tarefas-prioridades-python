@@ -24,6 +24,17 @@ def excluir_tarefa(fila, indice):
 
     return fila
 
+def editar_tarefa(fila, indice, nome, descricao, prioridade):
+    if fila.is_empty():
+        print("Não há tarefas na fila.")
+    elif indice < 1 or indice > fila.size():
+        print("Índice inválido.")
+    else:
+        fila.elementos[indice - 1] = cria_tarefa(nome, descricao, prioridade)
+        print("Tarefa editada com sucesso.")
+
+    return fila
+
 
 
 
