@@ -1,3 +1,5 @@
+import os
+
 def menu():
     print("============")
     print("TASK MANAGER")
@@ -10,3 +12,6 @@ def selecao():
     print("Digite 3 para excluir uma tarefa")
     print("Digite 4 para listar todas as tarefas")
     print("Digite 5 para sair do programa")
+
+def limpar_terminal():
+    os.system('cls' if os.name == 'nt' else 'clear')

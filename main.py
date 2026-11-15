@@ -10,6 +10,7 @@ from estruturas.fila import Fila
 tarefas = Fila()
 
 while True:
+    interface.limpar_terminal()
     interface.menu()
     interface.selecao()
     try:  # Verifica e trata erros de input
@@ -21,6 +22,7 @@ while True:
 
     match opcao_usuario:
         case 1:
+            interface.limpar_terminal()
             print('Criar Tarefa')
             nome = input('Digite o nome do tarefa: ')
             desc = input("Digite a descrição da tarefa: ")
@@ -33,6 +35,7 @@ while True:
             tarefas.enqueue(gerenciador.cria_tarefa(nome, desc, prioridade))
 
         case 2:
+            interface.limpar_terminal()
             print("Editar tarefa")
             gerenciador.listar_tarefas(tarefas)
             try:
@@ -50,6 +53,7 @@ while True:
             desc = input("Digite a nova descrição da tarefa: ")
             gerenciador.editar_tarefa(tarefas, indice, nome, desc, prioridade)
         case 3:
+            interface.limpar_terminal()
             print("Excluir tarefas")
             try:
                 indice = int(input("Digite o indice do tarefa: "))
@@ -59,6 +63,7 @@ while True:
                 continue
             gerenciador.excluir_tarefa(tarefas, indice)
         case 4:
+            interface.limpar_terminal()
             print('Listar tarefas')
             gerenciador.listar_tarefas(tarefas)
         case 5:
