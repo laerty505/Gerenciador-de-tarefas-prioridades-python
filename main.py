@@ -1,72 +1,106 @@
-import sys
-import os
-sys.path.append(os.path.abspath('/src/interface.py'))
-sys.path.append(os.path.abspath('/src/gerenciador.py'))
-sys.path.append(os.path.abspath('/src/estruturas/fila.py'))
-import interface
-import gerenciador
-from estruturas.fila import Fila
+import json
+from pathlib import Path
 
-tarefas = Fila()
+from src import gerenciador, interface
+from src.estruturas.fila import Fila
 
-while True:
-    interface.limpar_terminal()
-    interface.menu()
-    interface.selecao()
-    try:  # Verifica e trata erros de input
-        opcao_usuario = int(input('Digite um número: '))
+
+ARQUIVO_TAREFAS = Path(__file__).resolve().parent / "tarefas.json"
+
+
+def ler_indice(mensagem):
+    try:
+        return int(input(mensagem))
     except ValueError:
-        print('Entrada inválida! Digite um número ou "N" para cancelar.')
-        input('Aperte ENTER para continuar...')
-        continue
+        print("Digite um número inteiro válido.")
+        return None
 
-    match opcao_usuario:
-        case 1:
-            interface.limpar_terminal()
-            print('Criar Tarefa')
-            nome = input('Digite o nome do tarefa: ')
-            desc = input("Digite a descrição da tarefa: ")
-            try:
-                prioridade = int(input("Digite a prioridade do tarefa: (1 = ALTA PRIORIDIADE // 5 = BAIXA PRIORIDIADE)  "))
-            except ValueError:
-                print("Digite apenas números de 1 a 5.")
-                input("Aperte ENTER para continuar...")
-                continue
-            tarefas.enqueue(gerenciador.cria_tarefa(nome, desc, prioridade))
 
-        case 2:
-            interface.limpar_terminal()
-            print("Editar tarefa")
-            gerenciador.listar_tarefas(tarefas)
-            try:
-                indice = int(input("Digite o índice da tarefa que deseja editar: "))
-                prioridade = int(input("Digite a nova prioridade (1 = ALTA PRIORIDADE // 5 = BAIXA PRIORIDADE): "))
-            except ValueError:
-                print("Digite números válidos.")
-                input("Aperte ENTER para continuar...")
-                continue
-            if prioridade < 1 or prioridade > 5:
-                print("Digite uma prioridade de 1 a 5.")
-                input("Aperte ENTER para continuar...")
-                continue
-            nome = input("Digite o novo nome da tarefa: ")
-            desc = input("Digite a nova descrição da tarefa: ")
-            gerenciador.editar_tarefa(tarefas, indice, nome, desc, prioridade)
-        case 3:
-            interface.limpar_terminal()
-            print("Excluir tarefas")
-            try:
-                indice = int(input("Digite o indice do tarefa: "))
-            except ValueError:
-                print("Digite um número válido")
-                input("Aperte ENTER para continuar...")
-                continue
-            gerenciador.excluir_tarefa(tarefas, indice)
-        case 4:
-            interface.limpar_terminal()
-            print('Listar tarefas')
-            gerenciador.listar_tarefas(tarefas)
-        case 5:
-            break
-        case _:
-            print('Digite um número válido!')
+def ler_dados_tarefa(prefixo=""):
+    nome = input(f"Digite o nome {prefixo}da tarefa: ")
+    descricao = input(f"Digite a descrição {prefixo}da tarefa: ")
+    prioridade_texto = input(
+        f"Digite a prioridade {prefixo}da tarefa (1 = alta, 5 = baixa): "
+    )
+    try:
+        prioridade = int(prioridade_texto)
+        return gerenciador.cria_tarefa(nome, descricao, prioridade)
+    except ValueError as erro:
+        print(f"Dados inválidos: {erro}")
+        return None
+
+
+def main():
+    tarefas = Fila()
+    try:
+        for tarefa in gerenciador.carregar_tarefas(ARQUIVO_TAREFAS):
+            tarefas.enqueue(tarefa)
+    except (json.JSONDecodeError, ValueError, TypeError) as erro:
+        print(f"Não foi possível carregar {ARQUIVO_TAREFAS.name}: {erro}")
+        print("Corrija o arquivo JSON antes de continuar para evitar perder dados.")
+        input("Aperte ENTER para sair...")
+        return
+
+    while True:
+        interface.limpar_terminal()
+        interface.menu()
+        interface.selecao()
+        opcao = ler_indice("Digite um número: ")
+        if opcao is None:
+            input("Aperte ENTER para continuar...")
+            continue
+
+        try:
+            match opcao:
+                case 1:
+                    interface.limpar_terminal()
+                    print("Criar tarefa")
+                    tarefa = ler_dados_tarefa()
+                    if tarefa is not None:
+                        tarefas.enqueue(tarefa)
+                        gerenciador.salvar_tarefas(tarefas, ARQUIVO_TAREFAS)
+                        print("Tarefa criada e salva.")
+                    input("Aperte ENTER para continuar...")
+                case 2:
+                    interface.limpar_terminal()
+                    print("Editar tarefa")
+                    gerenciador.listar_tarefas(tarefas)
+                    indice = ler_indice("Digite o índice da tarefa que deseja editar: ")
+                    if indice is not None and 1 <= indice <= tarefas.size():
+                        tarefa = ler_dados_tarefa("nova ")
+                        if tarefa is not None:
+                            gerenciador.editar_tarefa(
+                                tarefas, indice, tarefa["nome"], tarefa["descricao"], tarefa["prioridade"]
+                            )
+                            gerenciador.salvar_tarefas(tarefas, ARQUIVO_TAREFAS)
+                    elif indice is not None:
+                        print("Índice inválido.")
+                    input("Aperte ENTER para continuar...")
+                case 3:
+                    interface.limpar_terminal()
+                    print("Excluir tarefa")
+                    gerenciador.listar_tarefas(tarefas)
+                    indice = ler_indice("Digite o índice da tarefa que deseja excluir: ")
+                    if indice is not None and 1 <= indice <= tarefas.size():
+                        gerenciador.excluir_tarefa(tarefas, indice)
+                        gerenciador.salvar_tarefas(tarefas, ARQUIVO_TAREFAS)
+                    elif indice is not None:
+                        gerenciador.excluir_tarefa(tarefas, indice)
+                    input("Aperte ENTER para continuar...")
+                case 4:
+                    interface.limpar_terminal()
+                    print("Lista de tarefas")
+                    gerenciador.listar_tarefas(tarefas)
+                    input("Aperte ENTER para continuar...")
+                case 5:
+                    break
+                case _:
+                    print("Digite uma opção de 1 a 5.")
+                    input("Aperte ENTER para continuar...")
+        except OSError as erro:
+            print(f"Não foi possível salvar as tarefas: {erro}")
+            input("Aperte ENTER para continuar...")
+
+
+if __name__ == "__main__":
+    main()
