@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from src.estruturas.lista_encadeada import ListaEncadeada
 
 
 def cria_tarefa(nome, descricao, prioridade):
@@ -50,6 +51,54 @@ def salvar_tarefas(fila, caminho):
         json.dump(fila.elementos, arquivo, ensure_ascii=False, indent=2)
         arquivo.write("\n")
     temporario.replace(caminho)
+
+
+def carregar_concluidas(caminho):
+    lista = ListaEncadeada()
+    for tarefa in carregar_tarefas(caminho):
+        lista.inserir_fim(tarefa)
+    return lista
+
+
+def salvar_concluidas(lista, caminho):
+    caminho = Path(caminho)
+    caminho.parent.mkdir(parents=True, exist_ok=True)
+    temporario = caminho.with_name(f"{caminho.name}.tmp")
+    tarefas = []
+    atual = lista.cabeca
+    while atual is not None:
+        tarefas.append(atual.dado)
+        atual = atual.proximo
+    with temporario.open("w", encoding="utf-8") as arquivo:
+        json.dump(tarefas, arquivo, ensure_ascii=False, indent=2)
+        arquivo.write("\n")
+    temporario.replace(caminho)
+
+
+def concluir_tarefa(fila, concluidas, indice):
+    if fila.is_empty():
+        print("Não há tarefas na fila.")
+    elif not isinstance(indice, int) or isinstance(indice, bool) or not 1 <= indice <= fila.size():
+        print("Índice inválido.")
+    else:
+        tarefa = fila.elementos.pop(indice - 1)
+        concluidas.inserir_fim(tarefa)
+        print(f"Tarefa '{tarefa['nome']}' marcada como concluída.")
+        return tarefa
+    return None
+
+
+def listar_concluidas(lista):
+    atual = lista.cabeca
+    if atual is None:
+        print("Não há tarefas concluídas.")
+        return
+    indice = 1
+    while atual is not None:
+        tarefa = atual.dado
+        print(f"{indice}. {tarefa['nome']} — {tarefa['descricao']} (prioridade {tarefa['prioridade']})")
+        atual = atual.proximo
+        indice += 1
 
 
 def listar_tarefas(fila):

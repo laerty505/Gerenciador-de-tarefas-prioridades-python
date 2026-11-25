@@ -6,6 +6,7 @@ from src.estruturas.fila import Fila
 
 
 ARQUIVO_TAREFAS = Path(__file__).resolve().parent / "tarefas.json"
+ARQUIVO_CONCLUIDAS = Path(__file__).resolve().parent / "tarefas_concluidas.json"
 
 
 def ler_indice(mensagem):
@@ -32,6 +33,12 @@ def ler_dados_tarefa(prefixo=""):
 
 def main():
     tarefas = Fila()
+    try:
+        concluidas = gerenciador.carregar_concluidas(ARQUIVO_CONCLUIDAS)
+    except (json.JSONDecodeError, ValueError, TypeError) as erro:
+        print(f"Não foi possível carregar {ARQUIVO_CONCLUIDAS.name}: {erro}")
+        input("Aperte ENTER para sair...")
+        return
     try:
         for tarefa in gerenciador.carregar_tarefas(ARQUIVO_TAREFAS):
             tarefas.enqueue(tarefa)
@@ -93,9 +100,25 @@ def main():
                     gerenciador.listar_tarefas(tarefas)
                     input("Aperte ENTER para continuar...")
                 case 5:
+                    interface.limpar_terminal()
+                    print("Concluir tarefa")
+                    gerenciador.listar_tarefas(tarefas)
+                    indice = ler_indice("Digite o índice da tarefa concluída: ")
+                    if indice is not None:
+                        tarefa = gerenciador.concluir_tarefa(tarefas, concluidas, indice)
+                        if tarefa is not None:
+                            gerenciador.salvar_concluidas(concluidas, ARQUIVO_CONCLUIDAS)
+                            gerenciador.salvar_tarefas(tarefas, ARQUIVO_TAREFAS)
+                    input("Aperte ENTER para continuar...")
+                case 6:
+                    interface.limpar_terminal()
+                    print("Tarefas concluídas")
+                    gerenciador.listar_concluidas(concluidas)
+                    input("Aperte ENTER para continuar...")
+                case 7:
                     break
                 case _:
-                    print("Digite uma opção de 1 a 5.")
+                    print("Digite uma opção de 1 a 7.")
                     input("Aperte ENTER para continuar...")
         except OSError as erro:
             print(f"Não foi possível salvar as tarefas: {erro}")
