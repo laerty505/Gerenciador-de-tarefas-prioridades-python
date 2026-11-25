@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 from src.estruturas.lista_encadeada import ListaEncadeada
+from src.estruturas.minHeap import MinHeap
 
 
 def cria_tarefa(nome, descricao, prioridade):
@@ -81,7 +82,8 @@ def concluir_tarefa(fila, concluidas, indice):
     elif not isinstance(indice, int) or isinstance(indice, bool) or not 1 <= indice <= fila.size():
         print("Índice inválido.")
     else:
-        tarefa = fila.elementos.pop(indice - 1)
+        posicao = _indice_original_por_prioridade(fila, indice)
+        tarefa = fila.elementos.pop(posicao)
         concluidas.inserir_fim(tarefa)
         print(f"Tarefa '{tarefa['nome']}' marcada como concluída.")
         return tarefa
@@ -105,12 +107,34 @@ def listar_tarefas(fila):
     if fila.is_empty():
         print("Não há tarefas na fila.")
     else:
-        for i, tarefa in enumerate(fila.elementos, start=1):
+        for i, tarefa in enumerate(_tarefas_por_prioridade(fila), start=1):
             print(
                 f"{i}. {tarefa['nome']} — {tarefa['descricao']} "
                 f"(prioridade {tarefa['prioridade']})"
             )
     return fila
+
+
+def _tarefas_por_prioridade(fila):
+    heap = MinHeap()
+    for indice, tarefa in enumerate(fila.elementos):
+        # O índice desempata prioridades iguais e evita comparar dicionários.
+        heap.inserir((tarefa["prioridade"], indice, tarefa))
+    ordenadas = []
+    while heap.heap:
+        _, _, tarefa = heap.extrair_minimo()
+        ordenadas.append(tarefa)
+    return ordenadas
+
+
+def _indice_original_por_prioridade(fila, indice):
+    heap = MinHeap()
+    for indice_original, tarefa in enumerate(fila.elementos):
+        heap.inserir((tarefa["prioridade"], indice_original, indice_original))
+    for posicao, (_, _, indice_original) in enumerate(iter(heap.extrair_minimo, None), start=1):
+        if posicao == indice:
+            return indice_original
+    return None
 
 
 def excluir_tarefa(fila, indice):
@@ -119,7 +143,8 @@ def excluir_tarefa(fila, indice):
     elif not isinstance(indice, int) or isinstance(indice, bool) or not 1 <= indice <= fila.size():
         print("Índice inválido.")
     else:
-        tarefa = fila.elementos.pop(indice - 1)
+        posicao = _indice_original_por_prioridade(fila, indice)
+        tarefa = fila.elementos.pop(posicao)
         print(f"Tarefa '{tarefa['nome']}' excluída com sucesso.")
     return fila
 
@@ -130,6 +155,7 @@ def editar_tarefa(fila, indice, nome, descricao, prioridade):
     elif not isinstance(indice, int) or isinstance(indice, bool) or not 1 <= indice <= fila.size():
         print("Índice inválido.")
     else:
-        fila.elementos[indice - 1] = cria_tarefa(nome, descricao, prioridade)
+        posicao = _indice_original_por_prioridade(fila, indice)
+        fila.elementos[posicao] = cria_tarefa(nome, descricao, prioridade)
         print("Tarefa editada com sucesso.")
     return fila
