@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 
 from src import gerenciador, interface
-from src.estruturas.fila import Fila
+from src.estruturas.lista_encadeada import ListaEncadeada
 
 
 ARQUIVO_TAREFAS = Path(__file__).resolve().parent / "tarefas.json"
@@ -32,7 +32,7 @@ def ler_dados_tarefa(prefixo=""):
 
 
 def main():
-    tarefas = Fila()
+    tarefas = ListaEncadeada()
     try:
         concluidas = gerenciador.carregar_concluidas(ARQUIVO_CONCLUIDAS)
     except (json.JSONDecodeError, ValueError, TypeError) as erro:
@@ -41,7 +41,7 @@ def main():
         return
     try:
         for tarefa in gerenciador.carregar_tarefas(ARQUIVO_TAREFAS):
-            tarefas.enqueue(tarefa)
+            tarefas.inserir_fim(tarefa)
     except (json.JSONDecodeError, ValueError, TypeError) as erro:
         print(f"Não foi possível carregar {ARQUIVO_TAREFAS.name}: {erro}")
         print("Corrija o arquivo JSON antes de continuar para evitar perder dados.")
@@ -64,7 +64,7 @@ def main():
                     print("Criar tarefa")
                     tarefa = ler_dados_tarefa()
                     if tarefa is not None:
-                        tarefas.enqueue(tarefa)
+                        tarefas.inserir_fim(tarefa)
                         gerenciador.salvar_tarefas(tarefas, ARQUIVO_TAREFAS)
                         print("Tarefa criada e salva.")
                     input("Aperte ENTER para continuar...")
@@ -73,7 +73,7 @@ def main():
                     print("Editar tarefa")
                     gerenciador.listar_tarefas(tarefas)
                     indice = ler_indice("Digite o índice da tarefa que deseja editar: ")
-                    if indice is not None and 1 <= indice <= tarefas.size():
+                    if indice is not None and 1 <= indice <= tarefas.tamanho():
                         tarefa = ler_dados_tarefa("nova ")
                         if tarefa is not None:
                             gerenciador.editar_tarefa(
@@ -88,7 +88,7 @@ def main():
                     print("Excluir tarefa")
                     gerenciador.listar_tarefas(tarefas)
                     indice = ler_indice("Digite o índice da tarefa que deseja excluir: ")
-                    if indice is not None and 1 <= indice <= tarefas.size():
+                    if indice is not None and 1 <= indice <= tarefas.tamanho():
                         gerenciador.excluir_tarefa(tarefas, indice)
                         gerenciador.salvar_tarefas(tarefas, ARQUIVO_TAREFAS)
                     elif indice is not None:

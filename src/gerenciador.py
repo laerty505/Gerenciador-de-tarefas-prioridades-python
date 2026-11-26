@@ -44,12 +44,12 @@ def carregar_tarefas(caminho):
     return tarefas
 
 
-def salvar_tarefas(fila, caminho):
+def salvar_tarefas(lista, caminho):
     caminho = Path(caminho)
     caminho.parent.mkdir(parents=True, exist_ok=True)
     temporario = caminho.with_name(f"{caminho.name}.tmp")
     with temporario.open("w", encoding="utf-8") as arquivo:
-        json.dump(fila.elementos, arquivo, ensure_ascii=False, indent=2)
+        json.dump(_tarefas_em_ordem_de_chegada(lista), arquivo, ensure_ascii=False, indent=2)
         arquivo.write("\n")
     temporario.replace(caminho)
 
@@ -76,14 +76,15 @@ def salvar_concluidas(lista, caminho):
     temporario.replace(caminho)
 
 
-def concluir_tarefa(fila, concluidas, indice):
-    if fila.is_empty():
-        print("Não há tarefas na fila.")
-    elif not isinstance(indice, int) or isinstance(indice, bool) or not 1 <= indice <= fila.size():
+def concluir_tarefa(lista, concluidas, indice):
+    ordenadas = _tarefas_por_prioridade(lista)
+    if lista.tamanho() == 0:
+        print("Não há tarefas pendentes.")
+    elif not isinstance(indice, int) or isinstance(indice, bool) or not 1 <= indice <= lista.tamanho():
         print("Índice inválido.")
     else:
-        posicao = _indice_original_por_prioridade(fila, indice)
-        tarefa = fila.elementos.pop(posicao)
+        tarefa = ordenadas[indice - 1]
+        lista.remover_identidade(tarefa)
         concluidas.inserir_fim(tarefa)
         print(f"Tarefa '{tarefa['nome']}' marcada como concluída.")
         return tarefa
@@ -103,21 +104,30 @@ def listar_concluidas(lista):
         indice += 1
 
 
-def listar_tarefas(fila):
-    if fila.is_empty():
-        print("Não há tarefas na fila.")
+def listar_tarefas(lista):
+    if lista.tamanho() == 0:
+        print("Não há tarefas pendentes.")
     else:
-        for i, tarefa in enumerate(_tarefas_por_prioridade(fila), start=1):
+        for i, tarefa in enumerate(_tarefas_por_prioridade(lista), start=1):
             print(
                 f"{i}. {tarefa['nome']} — {tarefa['descricao']} "
                 f"(prioridade {tarefa['prioridade']})"
             )
-    return fila
+    return lista
 
 
-def _tarefas_por_prioridade(fila):
+def _tarefas_em_ordem_de_chegada(lista):
+    tarefas = []
+    atual = lista.cabeca
+    while atual is not None:
+        tarefas.append(atual.dado)
+        atual = atual.proximo
+    return tarefas
+
+
+def _tarefas_por_prioridade(lista):
     heap = MinHeap()
-    for indice, tarefa in enumerate(fila.elementos):
+    for indice, tarefa in enumerate(_tarefas_em_ordem_de_chegada(lista)):
         # O índice desempata prioridades iguais e evita comparar dicionários.
         heap.inserir((tarefa["prioridade"], indice, tarefa))
     ordenadas = []
@@ -127,35 +137,28 @@ def _tarefas_por_prioridade(fila):
     return ordenadas
 
 
-def _indice_original_por_prioridade(fila, indice):
-    heap = MinHeap()
-    for indice_original, tarefa in enumerate(fila.elementos):
-        heap.inserir((tarefa["prioridade"], indice_original, indice_original))
-    for posicao, (_, _, indice_original) in enumerate(iter(heap.extrair_minimo, None), start=1):
-        if posicao == indice:
-            return indice_original
-    return None
-
-
-def excluir_tarefa(fila, indice):
-    if fila.is_empty():
-        print("Não há tarefas na fila.")
-    elif not isinstance(indice, int) or isinstance(indice, bool) or not 1 <= indice <= fila.size():
+def excluir_tarefa(lista, indice):
+    ordenadas = _tarefas_por_prioridade(lista)
+    if lista.tamanho() == 0:
+        print("Não há tarefas pendentes.")
+    elif not isinstance(indice, int) or isinstance(indice, bool) or not 1 <= indice <= lista.tamanho():
         print("Índice inválido.")
     else:
-        posicao = _indice_original_por_prioridade(fila, indice)
-        tarefa = fila.elementos.pop(posicao)
+        tarefa = ordenadas[indice - 1]
+        lista.remover_identidade(tarefa)
         print(f"Tarefa '{tarefa['nome']}' excluída com sucesso.")
-    return fila
+    return lista
 
 
-def editar_tarefa(fila, indice, nome, descricao, prioridade):
-    if fila.is_empty():
-        print("Não há tarefas na fila.")
-    elif not isinstance(indice, int) or isinstance(indice, bool) or not 1 <= indice <= fila.size():
+def editar_tarefa(lista, indice, nome, descricao, prioridade):
+    ordenadas = _tarefas_por_prioridade(lista)
+    if lista.tamanho() == 0:
+        print("Não há tarefas pendentes.")
+    elif not isinstance(indice, int) or isinstance(indice, bool) or not 1 <= indice <= lista.tamanho():
         print("Índice inválido.")
     else:
-        posicao = _indice_original_por_prioridade(fila, indice)
-        fila.elementos[posicao] = cria_tarefa(nome, descricao, prioridade)
+        tarefa_original = ordenadas[indice - 1]
+        posicao = next(i for i, tarefa in enumerate(_tarefas_em_ordem_de_chegada(lista)) if tarefa is tarefa_original)
+        lista.definir(posicao, cria_tarefa(nome, descricao, prioridade))
         print("Tarefa editada com sucesso.")
-    return fila
+    return lista
