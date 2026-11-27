@@ -26,7 +26,7 @@ def carregar_tarefas(caminho):
     caminho = Path(caminho)
     try:
         with caminho.open("r", encoding="utf-8") as arquivo:
-            dados = json.load(arquivo)
+            dados = json.load(arquivo) #Lê o JSON e converte pra estrutuas python
     except FileNotFoundError:
         return []
 
@@ -34,7 +34,7 @@ def carregar_tarefas(caminho):
         raise ValueError("O arquivo de tarefas deve conter uma lista JSON.")
 
     tarefas = []
-    for tarefa in dados:
+    for tarefa in dados: #Percorre os dados e cria cada tarefa e insere na lista tarefas
         if not isinstance(tarefa, dict):
             raise ValueError("Cada tarefa no arquivo deve ser um objeto JSON.")
         try:
@@ -49,12 +49,12 @@ def carregar_tarefas(caminho):
 def salvar_tarefas(lista, caminho):
     """Salva as tarefas pendentes preservando a ordem de chegada."""
     caminho = Path(caminho)
-    caminho.parent.mkdir(parents=True, exist_ok=True)
-    temporario = caminho.with_name(f"{caminho.name}.tmp")
+    caminho.parent.mkdir(parents=True, exist_ok=True) #Verifica se o caminho existe
+    temporario = caminho.with_name(f"{caminho.name}.tmp") #Cria um arquivo temporário
     with temporario.open("w", encoding="utf-8") as arquivo:
-        json.dump(_tarefas_em_ordem_de_chegada(lista), arquivo, ensure_ascii=False, indent=2)
+        json.dump(_tarefas_em_ordem_de_chegada(lista), arquivo, ensure_ascii=False, indent=2) #Escreve no arquivo a lista encadeada convertida em lista python
         arquivo.write("\n")
-    temporario.replace(caminho)
+    temporario.replace(caminho) #O arquivo temporario substitui o original
 
 
 def carregar_concluidas(caminho):

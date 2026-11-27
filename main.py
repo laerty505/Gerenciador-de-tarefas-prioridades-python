@@ -75,6 +75,7 @@ def main():
                         gerenciador.salvar_tarefas(tarefas, ARQUIVO_TAREFAS)
                         print("Tarefa criada e salva.")
                     input("Aperte ENTER para continuar...")
+
                 case 2:
                     interface.limpar_terminal()
                     print("Editar tarefa")
@@ -90,6 +91,7 @@ def main():
                     elif indice is not None:
                         print("Índice inválido.")
                     input("Aperte ENTER para continuar...")
+
                 case 3:
                     interface.limpar_terminal()
                     print("Excluir tarefa")
@@ -101,11 +103,13 @@ def main():
                     elif indice is not None:
                         gerenciador.excluir_tarefa(tarefas, indice)
                     input("Aperte ENTER para continuar...")
+
                 case 4:
                     interface.limpar_terminal()
                     print("Lista de tarefas")
                     gerenciador.listar_tarefas(tarefas)
                     input("Aperte ENTER para continuar...")
+
                 case 5:
                     interface.limpar_terminal()
                     print("Concluir tarefa")
@@ -117,13 +121,16 @@ def main():
                             gerenciador.salvar_concluidas(concluidas, ARQUIVO_CONCLUIDAS)
                             gerenciador.salvar_tarefas(tarefas, ARQUIVO_TAREFAS)
                     input("Aperte ENTER para continuar...")
+
                 case 6:
                     interface.limpar_terminal()
                     print("Tarefas concluídas")
                     gerenciador.listar_concluidas(concluidas)
                     input("Aperte ENTER para continuar...")
+
                 case 7:
                     break
+
                 case _:
                     print("Digite uma opção de 1 a 7.")
                     input("Aperte ENTER para continuar...")
