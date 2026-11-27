@@ -5,11 +5,13 @@ from src import gerenciador, interface
 from src.estruturas.lista_encadeada import ListaEncadeada
 
 
+# Define onde os arquivos de tarefas ficam, junto ao programa.
 ARQUIVO_TAREFAS = Path(__file__).resolve().parent / "tarefas.json"
 ARQUIVO_CONCLUIDAS = Path(__file__).resolve().parent / "tarefas_concluidas.json"
 
 
 def ler_indice(mensagem):
+    """Lê um número inteiro informado pelo usuário."""
     try:
         return int(input(mensagem))
     except ValueError:
@@ -18,6 +20,7 @@ def ler_indice(mensagem):
 
 
 def ler_dados_tarefa(prefixo=""):
+    """Solicita os dados e valida uma tarefa antes de retorná-la."""
     nome = input(f"Digite o nome {prefixo}da tarefa: ")
     descricao = input(f"Digite a descrição {prefixo}da tarefa: ")
     prioridade_texto = input(
@@ -32,6 +35,8 @@ def ler_dados_tarefa(prefixo=""):
 
 
 def main():
+    """Carrega os dados e executa o menu principal do gerenciador."""
+    # Mantém tarefas pendentes e concluídas em listas encadeadas separadas.
     tarefas = ListaEncadeada()
     try:
         concluidas = gerenciador.carregar_concluidas(ARQUIVO_CONCLUIDAS)
@@ -48,6 +53,7 @@ def main():
         input("Aperte ENTER para sair...")
         return
 
+    # Repete o menu até o usuário escolher sair.
     while True:
         interface.limpar_terminal()
         interface.menu()
@@ -59,6 +65,7 @@ def main():
 
         try:
             match opcao:
+                # Encaminha a escolha para a operação correspondente.
                 case 1:
                     interface.limpar_terminal()
                     print("Criar tarefa")

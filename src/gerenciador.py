@@ -5,6 +5,7 @@ from src.estruturas.minHeap import MinHeap
 
 
 def cria_tarefa(nome, descricao, prioridade):
+    """Valida e normaliza os campos de uma tarefa."""
     if not isinstance(nome, str) or not isinstance(descricao, str):
         raise ValueError("Nome e descrição devem ser textos.")
     nome = nome.strip()
@@ -21,6 +22,7 @@ def cria_tarefa(nome, descricao, prioridade):
 
 
 def carregar_tarefas(caminho):
+    """Lê e valida tarefas armazenadas em um arquivo JSON."""
     caminho = Path(caminho)
     try:
         with caminho.open("r", encoding="utf-8") as arquivo:
@@ -45,6 +47,7 @@ def carregar_tarefas(caminho):
 
 
 def salvar_tarefas(lista, caminho):
+    """Salva as tarefas pendentes preservando a ordem de chegada."""
     caminho = Path(caminho)
     caminho.parent.mkdir(parents=True, exist_ok=True)
     temporario = caminho.with_name(f"{caminho.name}.tmp")
@@ -55,6 +58,7 @@ def salvar_tarefas(lista, caminho):
 
 
 def carregar_concluidas(caminho):
+    """Carrega tarefas concluídas para uma lista encadeada."""
     lista = ListaEncadeada()
     for tarefa in carregar_tarefas(caminho):
         lista.inserir_fim(tarefa)
@@ -62,6 +66,7 @@ def carregar_concluidas(caminho):
 
 
 def salvar_concluidas(lista, caminho):
+    """Salva em JSON os dados da lista de tarefas concluídas."""
     caminho = Path(caminho)
     caminho.parent.mkdir(parents=True, exist_ok=True)
     temporario = caminho.with_name(f"{caminho.name}.tmp")
@@ -77,6 +82,7 @@ def salvar_concluidas(lista, caminho):
 
 
 def concluir_tarefa(lista, concluidas, indice):
+    """Move a tarefa escolhida para o final da lista de concluídas."""
     ordenadas = _tarefas_por_prioridade(lista)
     if lista.tamanho() == 0:
         print("Não há tarefas pendentes.")
@@ -92,6 +98,7 @@ def concluir_tarefa(lista, concluidas, indice):
 
 
 def listar_concluidas(lista):
+    """Exibe as tarefas concluídas na ordem em que foram finalizadas."""
     atual = lista.cabeca
     if atual is None:
         print("Não há tarefas concluídas.")
@@ -105,6 +112,7 @@ def listar_concluidas(lista):
 
 
 def listar_tarefas(lista):
+    """Exibe as tarefas pendentes ordenadas por prioridade."""
     if lista.tamanho() == 0:
         print("Não há tarefas pendentes.")
     else:
@@ -117,6 +125,7 @@ def listar_tarefas(lista):
 
 
 def _tarefas_em_ordem_de_chegada(lista):
+    """Converte os nós da lista em uma lista Python na ordem original."""
     tarefas = []
     atual = lista.cabeca
     while atual is not None:
@@ -126,6 +135,7 @@ def _tarefas_em_ordem_de_chegada(lista):
 
 
 def _tarefas_por_prioridade(lista):
+    """Retorna tarefas por prioridade, preservando empates por chegada."""
     heap = MinHeap()
     for indice, tarefa in enumerate(_tarefas_em_ordem_de_chegada(lista)):
         # O índice desempata prioridades iguais e evita comparar dicionários.
@@ -138,6 +148,7 @@ def _tarefas_por_prioridade(lista):
 
 
 def excluir_tarefa(lista, indice):
+    """Exclui a tarefa indicada pelo índice da listagem priorizada."""
     ordenadas = _tarefas_por_prioridade(lista)
     if lista.tamanho() == 0:
         print("Não há tarefas pendentes.")
@@ -151,6 +162,7 @@ def excluir_tarefa(lista, indice):
 
 
 def editar_tarefa(lista, indice, nome, descricao, prioridade):
+    """Atualiza os dados da tarefa indicada na listagem priorizada."""
     ordenadas = _tarefas_por_prioridade(lista)
     if lista.tamanho() == 0:
         print("Não há tarefas pendentes.")
